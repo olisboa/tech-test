@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 
 namespace AnyCompany
@@ -28,6 +29,11 @@ namespace AnyCompany
             connection.Close();
 
             return customer;
+        }
+
+        internal static IEnumerable<Customer> LoadAll()
+        {
+            throw new NotImplementedException();
         }
     }
 }
