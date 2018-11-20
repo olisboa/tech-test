@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using AnyCompany.Helper;
 
 namespace AnyCompany
 {
@@ -9,20 +10,18 @@ namespace AnyCompany
     {
         private static string ConnectionString = @"Data Source=(local);Database=Orders;User Id=admin;Password=password;";
 
+        /// <summary>
+        /// Saves Order to database
+        /// </summary>
+        /// <param name="order"></param>
         public void Save(Order order)
         {
-            SqlConnection connection = new SqlConnection(ConnectionString);
-            connection.Open();
+            var parameters = new SqlParameter[3];
+            parameters[0] = new SqlParameter("@OrderId", order.OrderId);
+            parameters[1] = new SqlParameter("@Amount", order.Amount);
+            parameters[2] = new SqlParameter("@VAT", order.VAT);
 
-            SqlCommand command = new SqlCommand("INSERT INTO Orders VALUES (@OrderId, @Amount, @VAT)", connection);
-
-            command.Parameters.AddWithValue("@OrderId", order.OrderId);
-            command.Parameters.AddWithValue("@Amount", order.Amount);
-            command.Parameters.AddWithValue("@VAT", order.VAT);
-
-            command.ExecuteNonQuery();
-
-            connection.Close();
+            SQLHelper.ExecuteNonQuery("INSERT INTO Orders VALUES (@OrderId, @Amount, @VAT)", parameters, ConnectionString);        
         }
 
         /// <summary>
@@ -32,8 +31,8 @@ namespace AnyCompany
         /// <returns></returns>
         public Order Load(int id)
         {
-            var orders = ExecuteQuery("SELECT * FROM Order WHERE OrderId = " + id);
-             return orders.FirstOrDefault();
+            var orders = SQLHelper.ExecuteQuery("SELECT * FROM Order WHERE OrderId = " + id, ConnectionString);
+             return ExtractOrder(orders)?.FirstOrDefault();
         }
 
         /// <summary>
@@ -42,41 +41,37 @@ namespace AnyCompany
         /// <returns></returns>
         public IEnumerable<Order> LoadAll()
         {
-            var orders = ExecuteQuery("SELECT * FROM Order");
-            return orders;
+            var orders = SQLHelper.ExecuteQuery("SELECT * FROM Order", ConnectionString);
+            return ExtractOrder(orders);
         }
 
         /// <summary>
-        /// Load Order for a gien customer
+        /// Load Order for a given customer
         /// </summary>
         /// <param name="customerId"></param>
         /// <returns></returns>
         public IEnumerable<Order> LoadByCustomerId(int customerId)
         {
-            var orders = ExecuteQuery("SELECT * FROM Order WHERE CustomerId = " + customerId);
-            return orders;
+            var orders = SQLHelper.ExecuteQuery("SELECT * FROM Order WHERE CustomerId = " + customerId, ConnectionString);
+            return ExtractOrder(orders);
         }
 
-        
-        private IEnumerable<Order> ExecuteQuery(string query)
+        /// <summary>
+        /// Maps IEnumerable<IDataRecord> to Order objects
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public IEnumerable<Order> ExtractOrder(IEnumerable<IDataRecord> data)
         {
-            SqlConnection connection = new SqlConnection(ConnectionString);
-            using (SqlCommand cmd = new SqlCommand(query, connection))
+            foreach (var row in data ?? Enumerable.Empty<IDataRecord>())
             {
-                connection.Open();
-                using (IDataReader reader = cmd.ExecuteReader())
+                yield return new Order()
                 {
-                    while (reader.Read())
-                    {
-                        yield return new Order
-                        {
-                            OrderId = int.Parse(reader["OrderId"].ToString()),
-                            CustomerId = int.Parse(reader["CustomerId"].ToString()),
-                            VAT = double.Parse(reader["VAT"].ToString()),
-                            Amount = double.Parse(reader["Country"].ToString())
-                        };
-                    }
-                }
+                    OrderId = int.Parse(row["OrderId"].ToString()),
+                    CustomerId = int.Parse(row["CustomerId"].ToString()),
+                    VAT = double.Parse(row["VAT"].ToString()),
+                    Amount = double.Parse(row["Country"].ToString())
+                };
             }
         }
     }

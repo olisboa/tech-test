@@ -2,6 +2,9 @@
 
 namespace AnyCompany
 {
+    /// <summary>
+    /// Repository Interface to enable decoupling of the repositories from real implementations.
+    /// </summary>
     public interface ICustomerRepository
     {
         /// <summary>

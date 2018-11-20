@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using System.Data;
+using System.Linq;
+using AnyCompany.Helper;
 
 namespace AnyCompany
 {
@@ -8,32 +10,43 @@ namespace AnyCompany
     {
         private static string ConnectionString = @"Data Source=(local);Database=Customers;User Id=admin;Password=password;";
 
+        /// <summary>
+        /// Loads Customer with the given id
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <returns></returns>
         public static Customer Load(int customerId)
         {
-            Customer customer = new Customer();
-
-            SqlConnection connection = new SqlConnection(ConnectionString);
-            connection.Open();
-
-            SqlCommand command = new SqlCommand("SELECT * FROM Customer WHERE CustomerId = " + customerId,
-                connection);
-            var reader = command.ExecuteReader();
-
-            while (reader.Read())
-            {
-                customer.Name = reader["Name"].ToString();
-                customer.DateOfBirth = DateTime.Parse(reader["DateOfBirth"].ToString());
-                customer.Country = reader["Country"].ToString();
-            }
-
-            connection.Close();
-
-            return customer;
+            var customer = SQLHelper.ExecuteQuery("SELECT * FROM Customer WHERE CustomerId = " + customerId, ConnectionString);
+            return ExtractCustomer(customer)?.FirstOrDefault();
         }
 
+        /// <summary>
+        /// Loads all Customer Objects
+        /// </summary>
+        /// <returns></returns>
         internal static IEnumerable<Customer> LoadAll()
         {
-            throw new NotImplementedException();
+            var customers = SQLHelper.ExecuteQuery("SELECT * FROM Customer", ConnectionString);
+            return ExtractCustomer(customers);
         }
+
+        /// <summary>
+        /// Maps IEnumerable<IDataRecord> to Customer objects
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private static IEnumerable<Customer> ExtractCustomer(IEnumerable<IDataRecord> data)
+        {
+            foreach (var row in data ?? Enumerable.Empty<IDataRecord>())
+            {
+                yield return new Customer()
+                {
+                    Name = row["Name"].ToString(),
+                    DateOfBirth = DateTime.Parse(row["DateOfBirth"].ToString()),
+                    Country = row["Country"].ToString()
+                };
+            }
+       }
     }
 }

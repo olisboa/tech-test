@@ -5,15 +5,29 @@ using AutoFixture;
 
 namespace AnyCompany.Tests.Helper
 {
+    /// <summary>
+    /// Helper static class to create required test data
+    /// </summary>
     public static class TestObjectCreator
     {
         private static Fixture any = new Fixture();
 
+        /// <summary>
+        /// Returns instance of the given type where the values of the instance are irrelevant
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static T Instance<T>()
         {
             return any.Create<T>();
         }
 
+        /// <summary>
+        /// Returns instance of Order with the given values
+        /// </summary>
+        /// <param name="Id"></param>
+        /// <param name="amount"></param>
+        /// <returns></returns>
         public static Order Order(int Id = 1, double amount = 0)
         {
             return new Order()
@@ -23,6 +37,11 @@ namespace AnyCompany.Tests.Helper
             };
         }
 
+        /// <summary>
+        /// Returns instance of Customer with the given values
+        /// </summary>
+        /// <param name="Id"></param>
+        /// <returns></returns>
         public static Customer UKCustomer(int Id = 1)
         {
             return new Customer()
@@ -34,6 +53,12 @@ namespace AnyCompany.Tests.Helper
             };
         }
 
+        /// <summary>
+        /// Returns instance of Customer with the given values
+        /// </summary>
+        /// <param name="Id"></param>
+        /// <param name="country"></param>
+        /// <returns></returns>
         public static Customer NonUKCustomer(int Id = 2, string country = "USA")
         {
             return new Customer()
@@ -45,21 +70,41 @@ namespace AnyCompany.Tests.Helper
             };
         }
 
+        /// <summary>
+        /// Returns Customer with the given id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public static Customer GetCustomer(int id)
         {
             return GetAllCustomers().FirstOrDefault(c => c.CustomerId == id);
         }
 
+        /// <summary>
+        /// Returns instance of Order with the given id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public static Order GetOrder(int id)
         {
             return GetAllOrders().FirstOrDefault(o => o.OrderId == id);
         }
 
+        /// <summary>
+        /// Returns Orders with the given customer id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public static IEnumerable<Order> GetOrderByCustomerId(int id)
         {
             return GetAllOrders().Where(o => o.CustomerId == id);
         }
 
+
+        /// <summary>
+        /// Returns all Customers
+        /// </summary>
+        /// <returns></returns>
         public static IEnumerable<Customer> GetAllCustomers()
         {
             yield return new Customer()
@@ -96,6 +141,10 @@ namespace AnyCompany.Tests.Helper
 
         }
 
+        /// <summary>
+        /// Returns all Orders
+        /// </summary>
+        /// <returns></returns>
         public static IEnumerable<Order> GetAllOrders()
         {
             yield return new Order()

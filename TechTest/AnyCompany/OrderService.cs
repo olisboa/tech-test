@@ -8,7 +8,7 @@ namespace AnyCompany
         private readonly IOrderRepository _orderRepository;
         private readonly ICustomerRepository _customerRepository;
         /// <summary>
-        /// Represent Dependency Injection for the required respositories
+        /// Represent Dependency Injection for the set of required respositories
         /// </summary>
         /// <param name="orderRepository"></param>
         /// <param name="customerRepository"></param>
